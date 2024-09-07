@@ -5,8 +5,8 @@ This is a simple implementation in Python of the Practical Byzantine Fault Toler
 
 
 ## Requirements
-- python = 3.11.1
-- aiohttp = 3.8.5
+- python = 3.11
+- aiohttp = 3.8
 
 ## How-to Run
 
