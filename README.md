@@ -11,3 +11,10 @@ This is a simple implementation in Python of the Practical Byzantine Fault Toler
 ## How-to Run
 
 Run **`python main.py`** to establish the nodes within the network.
+
+***Run using Conda***
+```
+conda create -n my-pbft-env python=3.11 aiohttp=3.8
+conda activate my-pbft-env
+python main.py
+``` 
