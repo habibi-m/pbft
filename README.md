@@ -5,10 +5,9 @@ This is a simple implementation in Python of the Practical Byzantine Fault Toler
 
 
 ## Requirements
-- Python >= 3.11.1
-- Aiohttp >= 3.8.5
-- curl >= 7.81.0
+- python = 3.11.1
+- aiohttp = 3.8.5
 
-## 3.0 How-to Run
+## How-to Run
 
 Run **`python main.py`** to establish the nodes within the network.
