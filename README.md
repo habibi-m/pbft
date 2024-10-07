@@ -14,7 +14,7 @@ Run **`python main.py`** to establish the nodes within the network.
 
 ***Run using Conda***
 ```
-conda create -n my-pbft-env python=3.11 aiohttp=3.8
+conda create -n my-pbft-env python=3.11 aiohttp=3.8  OR conda env list
 conda activate my-pbft-env
 python main.py
 ``` 

@@ -1,4 +1,5 @@
 import random
+from tabulate import tabulate
 
 # dictionary to collect replies of nodes after final stage of PBFT
 replies_list = {}
@@ -77,9 +78,45 @@ class PBFTAggregator:
         PBFTAggregator.initReplies(total_nodes)
     
     # Counts and display node's data and number of corrupted, correct entries
+    # @staticmethod
+    # def checkReplies():
+    #     for key, value in replies_list.items():
+    #         num_of_corrupt = value.count("Corrupt")
+    #         num_of_correct = len(replies_list[key]) - num_of_corrupt
+    #         print(f"Node {key} -> {num_of_correct} Correct {num_of_corrupt} Corrupt")
+    
+
     @staticmethod
-    def checkReplies():
+    def checkFinalConsensus():
+        correct_responses = 0
+        corrupt_responses = 0
+
+        for key, value in replies_list.items():
+            print(f"Node {key}: Received Messages -> {value}")
+            if value.count("Corrupt") == 0:
+                correct_responses += 1
+            else:
+                corrupt_responses += 1
+
+        print(f"Correct Responses: {correct_responses}, Corrupt Responses: {corrupt_responses}")
+
+        if correct_responses > corrupt_responses:
+            print("\nFinal Consensus Result: SUCCESS - The correct message was agreed upon.\n")
+            return True
+        else:
+            print("\nFinal Consensus Result: FAILURE - The wrong message was agreed upon.\n")
+            return False
+    
+    @staticmethod
+    def showConsensusTable():
+        table_data = []
         for key, value in replies_list.items():
             num_of_corrupt = value.count("Corrupt")
             num_of_correct = len(replies_list[key]) - num_of_corrupt
-            print(f"Node {key} -> {num_of_correct} Correct {num_of_corrupt} Corrupt")
+            status = "Corrupt" if num_of_corrupt > 0 else "Correct"
+            table_data.append([f"Node {key}", num_of_correct, num_of_corrupt, status])
+
+        print(tabulate(table_data, headers=["Node", "Correct Messages", "Corrupt Messages", "Status"]))
+
+
+

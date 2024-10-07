@@ -7,6 +7,9 @@ import random
 
 
 class Node:
+
+    base_starting_port = 8010
+
     # initializing the node
     def __init__(self, port, loop, nodes_list, corrupt=False, commander=False):
         self.port = port
@@ -27,7 +30,7 @@ class Node:
         self.corrupt = corrupt
         self.commander = commander
         # Saves ID of the node
-        self.id = self.port - 8080
+        self.id = self.port - Node.base_starting_port
         # Sends the list of all the nodes within the network (even offline ones)
         self.nodes_list = list(nodes_list)
         self.nodes_list.remove(self.id)
@@ -37,7 +40,16 @@ class Node:
     # Handler for status router
     async def status(self, request):
         # Shows status of node
-        return web.json_response(f'Node {self.id} Up and Running')
+
+        msg = ''
+        if(self.commander):
+            msg = " I AM COMMANDER!"
+        # else:
+        #     msg = "I'm not Commander"
+
+        return web.json_response(f'Node {self.id} Up and Running.{msg}')
+
+        # return web.json_response(f'Node {self.id} Up and Running')
 
     # First stage of PBFT - Pre-Prepare
     async def pre_prepare(self, request):
@@ -56,13 +68,13 @@ class Node:
             for i in self.nodes_list:
                 if i == random_node:
                     try:
-                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=fake_message) as response:
+                        async with self.session.post(f'http://localhost:{Node.base_starting_port + i}/prepare', json=fake_message) as response:
                             pass
                     except Exception as e:
                         pass
                 else:
                     try:
-                        async with self.session.post(f'http://localhost:{8080 + i}/prepare', json=message) as response:
+                        async with self.session.post(f'http://localhost:{Node.base_starting_port + i}/prepare', json=message) as response:
                             pass
                     except Exception as e:
                         pass
@@ -70,7 +82,10 @@ class Node:
 
             execution_time = (end_time - start_time).total_seconds()
             print(f"\n\nPBFT Consensus Time: {execution_time}s")
-            PBFTAggregator.checkReplies()
+            
+            PBFTAggregator.checkFinalConsensus()
+            PBFTAggregator.showConsensusTable()
+            
             # Resetting replies_list for next consensus run
             PBFTAggregator.resetReplies(len(self.nodes_list) + 1)
             return web.Response(text=f'\nPBFT Consensus Time: {execution_time}s\n')
@@ -87,7 +102,7 @@ class Node:
         # Sending received message from Commander Node to all the other nodes which initiates the prepare stage
         for i in self.nodes_list:
             try:
-                await self.session.post(f'http://localhost:{8080 + i}/commit', json=message)
+                await self.session.post(f'http://localhost:{Node.base_starting_port + i}/commit', json=message)
             except Exception as e:
                 pass
         return web.HTTPOk()
@@ -98,7 +113,7 @@ class Node:
         # Sending prepare message from all other nodes to all the other nodes which initiates the commit stage
         for i in self.nodes_list:
             try:
-                await self.session.post(f'http://localhost:{8080 + i}/reply', json=message)
+                await self.session.post(f'http://localhost:{Node.base_starting_port + i}/reply', json=message)
             except Exception as e:
                 pass
         return web.HTTPOk()
@@ -116,14 +131,13 @@ class Node:
     def start(self):
         try:
             # Creates coroutine for webserver
-            coroutine = self.loop.create_server(
-                self.handler, '0.0.0.0', self.port)
+            coroutine = self.loop.create_server(self.handler, '0.0.0.0', self.port)
             # Starts the loop for the webserver
             self.server = self.loop.run_until_complete(coroutine)
             # Gets address and port to print out information of the node
             address, port = self.server.sockets[0].getsockname()
-            if len(self.nodes_list) < 5:
-                print(f'Node {self.id} started on http://{address}:{port}')
+            #if len(self.nodes_list) < 5:
+            print(f'Node {self.id} started on http://{address}:{port}')
         # Checks if any exception is raised during creation process
         except Exception as e:
             sys.stderr.write('Error: ' + format(str(e)) + "\n")
