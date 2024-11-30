@@ -17,7 +17,7 @@ class PBFTAggregator:
     # Generate node list
     def nodes_list(self, num_of_corrupt):
         nodes_list = []
-        for i in range(0, 2*num_of_corrupt + 1):
+        for i in range(0, 3*num_of_corrupt + 1):
             nodes_list.append(i)
         return nodes_list
     
