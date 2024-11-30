@@ -17,7 +17,7 @@ class PBFTAggregator:
     # Generate node list
     def nodes_list(self, num_of_corrupt):
         nodes_list = []
-        for i in range(0, 3*num_of_corrupt + 1):
+        for i in range(0, 2*num_of_corrupt + 1):
             nodes_list.append(i)
         return nodes_list
     
@@ -76,15 +76,6 @@ class PBFTAggregator:
     def resetReplies(total_nodes):
         replies_list.clear()
         PBFTAggregator.initReplies(total_nodes)
-    
-    # Counts and display node's data and number of corrupted, correct entries
-    # @staticmethod
-    # def checkReplies():
-    #     for key, value in replies_list.items():
-    #         num_of_corrupt = value.count("Corrupt")
-    #         num_of_correct = len(replies_list[key]) - num_of_corrupt
-    #         print(f"Node {key} -> {num_of_correct} Correct {num_of_corrupt} Corrupt")
-    
 
     @staticmethod
     def checkFinalConsensus():
@@ -92,13 +83,18 @@ class PBFTAggregator:
         corrupt_responses = 0
 
         for key, value in replies_list.items():
-            print(f"Node {key}: Received Messages -> {value}")
-            if value.count("Corrupt") == 0:
+            #print(f"Node {key}: Received Messages -> {value}")
+            num_of_corrupt = value.count("Corrupt")
+            num_of_correct = len(value) - num_of_corrupt
+
+            if num_of_correct > num_of_corrupt:
                 correct_responses += 1
             else:
                 corrupt_responses += 1
+            
+            #print(f"Node {key} received {num_of_correct} correct and {num_of_corrupt} corrupt")
 
-        print(f"Correct Responses: {correct_responses}, Corrupt Responses: {corrupt_responses}")
+        # print(f"Correct Responses: {correct_responses}, Corrupt Responses: {corrupt_responses}")
 
         if correct_responses > corrupt_responses:
             print("\nFinal Consensus Result: SUCCESS - The correct message was agreed upon.\n")
@@ -113,7 +109,7 @@ class PBFTAggregator:
         for key, value in replies_list.items():
             num_of_corrupt = value.count("Corrupt")
             num_of_correct = len(replies_list[key]) - num_of_corrupt
-            status = "Corrupt" if num_of_corrupt > 0 else "Correct"
+            status = "Corrupt" if num_of_corrupt > num_of_correct  else "Correct"
             table_data.append([f"Node {key}", num_of_correct, num_of_corrupt, status])
 
         print(tabulate(table_data, headers=["Node", "Correct Messages", "Corrupt Messages", "Status"]))
